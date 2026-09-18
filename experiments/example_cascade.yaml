@@ -1,0 +1,38 @@
+parent: artifacts/models/example_model
+
+budget:
+  device: RTX4070
+  max_wall_hours: 12
+
+search:
+  mutations:
+    - width
+    - depth
+    - normalization
+    - recurrent_depth
+    - latent_feedback
+  proxy_steps: 1000
+  promotion_fraction: 0.2
+
+cascade:
+  - name: preserve_quality
+    require:
+      validation_loss: "<= baseline + tolerance"
+
+  - name: improve_latency
+    minimize: latency_ms
+    preserve:
+      - validation_loss
+
+  - name: improve_trainability
+    minimize: time_to_target_loss
+    preserve:
+      - validation_loss
+      - latency_ms
+
+  - name: reduce_memory
+    minimize: peak_vram_mb
+    preserve:
+      - validation_loss
+      - latency_ms
+      - time_to_target_loss

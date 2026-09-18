@@ -1,0 +1,25 @@
+model:
+  name: example_mlp
+  framework: pytorch
+  architecture:
+    source: python
+    module: examples.torch_fx_to_tinygrad
+    class: TinyMLP
+    config: null
+  weights:
+    path: weights.pt
+    format: state_dict
+  example_input:
+    shape: [5, 4]
+    dtype: float32
+
+task:
+  type: classification
+  dataset: placeholder
+  split: validation
+
+baseline:
+  metrics:
+    - loss
+    - latency_ms
+    - peak_vram_mb
