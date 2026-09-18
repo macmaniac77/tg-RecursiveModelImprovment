@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tg-aoi"
+version = "0.1.0"
+description = "A reducible, framework-neutral function-block language for AI architectures, with Tinygrad as the first execution backend."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Maclaine Crabbe Morham"}]
+dependencies = []
+
+[project.optional-dependencies]
+tinygrad = ["tinygrad"]
+torch = ["torch"]
+jax = ["jax"]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
