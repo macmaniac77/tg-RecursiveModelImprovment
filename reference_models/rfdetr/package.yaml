@@ -1,0 +1,39 @@
+# PLACEHOLDER package manifest for the RF-DETR guinea pig.
+
+model:
+  name: rfdetr_tinygrad
+  framework: tinygrad
+  architecture:
+    detect_entrypoint: detect.py
+    train_entrypoint: train.py
+    dictionary: model_dictionary.yaml
+    map: architecture_map.yaml
+  weights:
+    path: weights.pt
+    format: unknown   # inspect before changing this
+  example_input:
+    shape: [1, 3, 640, 640]
+    dtype: float32
+
+task:
+  type: object_detection
+  dataset: coco
+  validation_split: val2017
+
+baseline:
+  required_before_search: true
+  metrics:
+    - coco_ap
+    - ap50
+    - ap75
+    - latency_ms
+    - throughput
+    - peak_vram_mb
+    - parameter_count
+    - time_to_target_ap
+
+search:
+  allow_architecture_mutation: true
+  allow_training_mutation: true
+  allow_data_mutation: false
+  require_lineage: true
