@@ -1,0 +1,12 @@
+{
+  "name": "MATMUL",
+  "level": "word",
+  "meaning": "Matrix/tensor contraction over the shared inner dimension.",
+  "math_latex": "C_{ij}=\\sum_k A_{ik}B_{kj}",
+  "tinygrad": "a.matmul(b)",
+  "pytorch": "torch.matmul(a, b)",
+  "jax": "jax.numpy.matmul(a, b)",
+  "cpp_reference": "for(i) for(j) for(k) C[i][j] += A[i][k] * B[k][j];",
+  "lean_note": "Specify finite index types and define C i j as a finite sum over k.",
+  "status": "semantic AOI; future lowering may expand below MATMUL"
+}
