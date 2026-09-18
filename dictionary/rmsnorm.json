@@ -1,0 +1,11 @@
+{
+  "name": "RMSNORM",
+  "level": "word",
+  "math_latex": "y=x\\odot w / \\sqrt{\\operatorname{mean}(x^2)+\\epsilon}",
+  "tinygrad": "compose from mul/mean/rsqrt/mul",
+  "pytorch": "torch.nn.RMSNorm or explicit operations",
+  "jax": "explicit operations / library implementation",
+  "cpp_reference": "square -> mean -> add eps -> rsqrt -> scale",
+  "lean_note": "Specify norm-like scaling over a finite feature index.",
+  "expansion": ["MUL", "REDUCE_MEAN", "ADD", "RSQRT", "MUL", "MUL"]
+}
