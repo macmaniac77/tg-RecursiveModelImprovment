@@ -1,0 +1,12 @@
+{
+  "name": "SOFTMAX",
+  "level": "word",
+  "meaning": "Exponentiate normalized logits after subtracting their maximum for numerical stability.",
+  "math_latex": "\\operatorname{softmax}(x)_i=\\frac{e^{x_i-m}}{\\sum_j e^{x_j-m}},\\quad m=\\max_j x_j",
+  "tinygrad": "x.softmax(axis=-1)",
+  "pytorch": "torch.softmax(x, dim=-1)",
+  "jax": "jax.nn.softmax(x, axis=-1)",
+  "cpp_reference": "max -> subtract -> exp -> sum -> divide",
+  "lean_note": "Define pointwise exp divided by finite sum; numerical-stability rewrite is extensionally equivalent over reals.",
+  "expansion": ["REDUCE_MAX", "SUB", "EXP", "REDUCE_SUM", "DIV"]
+}
