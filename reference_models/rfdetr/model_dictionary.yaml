@@ -1,0 +1,29 @@
+# PLACEHOLDER — populate from the real Tinygrad RF-DETR implementation.
+#
+# This is executable metadata used to translate source structure into canonical
+# AOIs. Do not treat this as prose documentation.
+
+model:
+  canonical_name: RF_DETR
+  source_framework: tinygrad
+  source_entrypoint: detect.py
+  training_entrypoint: train.py
+
+blocks: {}
+
+# Example future form:
+#
+# blocks:
+#   encoder_attention:
+#     source_pattern: "model.encoder.layers.*.self_attn"
+#     aoi: MULTIHEAD_ATTENTION
+#     parameters:
+#       q_weight: "*.q_proj.weight"
+#       k_weight: "*.k_proj.weight"
+#       v_weight: "*.v_proj.weight"
+#
+# heads:
+#   class_head:
+#     aoi: CLASSIFICATION_HEAD
+#   box_head:
+#     aoi: BOX_REGRESSION_HEAD
