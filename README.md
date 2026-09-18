@@ -27,7 +27,28 @@ The long-term target is an architecture research workbench that can:
 
 The intended first laboratory is deliberately modest: **single-GPU research on an RTX 4070-class machine**, where many small controlled experiments are more valuable than attempting frontier-scale pretraining.
 
-## Current v0.1
+## Repository map
+
+Every major subsystem contains its own README describing what it is expected to become. Future agents should read `AGENTS.md` first, then the README nearest the code they are changing.
+
+- `src/tgaoi/` — canonical architecture language, types, graph IR, registry, expansion/compression
+- `src/tgaoi/aoi/` — reusable AOI/function-block library
+- `src/tgaoi/importers/` — PyTorch/JAX/ONNX/Tinygrad → canonical IR
+- `src/tgaoi/backends/` — canonical IR → Tinygrad execution first, other exporters later
+- `specs/` — Rosetta Stone: math/LaTeX/TG/PyTorch/JAX/C++/Lean definitions
+- `models/` — canonical complete model-family definitions
+- `training/` — serializable training algorithms and curricula
+- `data/` — datasets, provenance, splits, active/self-training data loops
+- `benchmarks/` — measurable missions and validation protocols
+- `objectives/` — multi-objective constraints / Pareto / reward hierarchy
+- `experiment/` — reproducible training and measurement harness
+- `mutate/` — typed architecture/training mutation operators
+- `discovery/` — repeated-subgraph mining and new-AOI promotion
+- `search/` — Dream-RSI-like meta-research/search policy
+- `memory/` — symbolic, empirical, and learned research memory
+- `viewer/` — graph/dashboard interface for human inspection and intervention
+
+## Current state
 
 Implemented now:
 
@@ -35,12 +56,13 @@ Implemented now:
 - JSON round-trip serialization
 - starter AOIs: `SOFTMAX`, `RMSNORM`, `LINEAR`, `ATTENTION`, `ADAM_STEP`
 - a minimal Tinygrad executor for the starter alphabet
-- PyTorch FX and JAXPR importer scaffolds that preserve unknown operations instead of lying about support
-- Rosetta dictionary entries connecting math, Tinygrad, PyTorch, JAX, C++ reference ideas, and Lean notes
+- PyTorch FX `Linear → ReLU → Linear` lowering with explicit weights/state
+- a committed PyTorch→IR→Tinygrad numerical equivalence test
+- JAXPR importer scaffold
+- Rosetta dictionary starter entries
 - research-loop and benchmark-design documents
-- tests for IR validation and serialization
 
-This is intentionally **not** yet an arbitrary-model converter. That claim should only be made after equivalence tests exist.
+This is intentionally **not** yet an arbitrary-model converter. Support is earned one equivalence-tested pattern at a time.
 
 ## Install
 
@@ -51,16 +73,11 @@ pip install -e '.[dev]'
 pytest
 ```
 
-Tinygrad backend:
+Tinygrad + PyTorch milestone:
 
 ```bash
-pip install -e '.[dev,tinygrad]'
-```
-
-## Inspect an AOI
-
-```bash
-python examples/build_attention.py
+pip install -e '.[dev,tinygrad,torch]'
+python examples/torch_fx_to_tinygrad.py
 ```
 
 ## Design rule
@@ -69,20 +86,22 @@ python examples/build_attention.py
 
 `ATTENTION` may be convenient to reason about as one unit, but the system must be able to open it, inspect its children, mutate them, and ultimately lower them to the primitive execution substrate.
 
-## Near-term target
+## Next hard milestone
+
+Make AOIs genuinely recursive and executable:
 
 ```text
-small PyTorch MLP
-      ↓ torch.fx
-canonical tg-aoi IR
-      ↓
-Tinygrad execution
-      ↓
-copy identical weights
-      ↓
-numerically equivalent output
+TRANSFORMER_BLOCK
+    ↓ expand
+ATTENTION + RMSNORM + MLP + residuals
+    ↓ expand
+SOFTMAX + LINEAR + ...
+    ↓ expand
+canonical primitive graph
+    ↓
+Tinygrad
 ```
 
-Then repeat with JAX. After translation is trustworthy, build Transformer blocks, architecture mutation, repeated-subgraph AOI discovery, and the controlled research harness.
+Then prove equivalence against a tiny PyTorch Transformer block.
 
-See `docs/ROADMAP.md`.
+See `AGENTS.md`, `docs/ROADMAP.md`, and the README inside each subsystem.

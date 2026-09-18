@@ -1,53 +1,105 @@
 # Roadmap
 
-## v0.1 — alphabet and dictionary
+This is the chronological build order. The README inside each subsystem defines the **destination contract** for that subsystem.
 
-- canonical Graph / Node / TensorType
-- explicit starter AOIs: Softmax, RMSNorm, Linear, Attention, Adam step
-- JSON serialization
-- Tinygrad execution backend for starter primitive operations
-- Rosetta dictionary examples
-- PyTorch FX and JAXPR importer scaffolds
+## v0.1 — alphabet and first translation proof
 
-## v0.2 — first complete sentence
+- [x] canonical Graph / Node / TensorType
+- [x] explicit starter AOIs: Softmax, RMSNorm, Linear, Attention, Adam step
+- [x] JSON serialization
+- [x] Tinygrad execution backend for starter operations
+- [x] Rosetta dictionary examples
+- [x] PyTorch FX importer scaffold
+- [x] JAXPR importer scaffold
+- [x] first hard translation path: PyTorch Linear→ReLU→Linear → IR → Tinygrad
+- [x] numerical equivalence test committed for that path
 
-- recursively expand `AOI::...` nodes
-- symbolic shape unification
-- parameter/state objects
-- working Tinygrad TransformerBlock
-- weight-copy equivalence test against a tiny PyTorch model
+## v0.2 — recursive AOI language
 
-## v0.3 — translation
+- [ ] recursively expand `AOI::...` nodes
+- [ ] versioned AOI registry wired into expansion
+- [ ] symbolic shape/dimension unification
+- [ ] semantic axes
+- [ ] explicit Parameter / Buffer / MutableState types
+- [ ] graph hashing and stable canonical serialization
+- [ ] graph diff
+- [ ] tiny TransformerBlock assembled from AOIs
+- [ ] full recursive expansion to primitive graph
+- [ ] PyTorch TransformerBlock → Tinygrad numerical equivalence
 
-- robust PyTorch FX importer for supported op subset
-- JAXPR canonicalization
-- unsupported-op preservation as opaque nodes
-- graph diff and equivalence tooling
+## v0.3 — translation breadth
 
-## v0.4 — AOI discovery
+- [ ] robust PyTorch FX/torch.export importer for a documented supported subset
+- [ ] JAXPR canonicalization with real shape/dtype handling
+- [ ] ONNX importer
+- [ ] direct Tinygrad/UOp inspection/import path
+- [ ] framework alias dictionary tied to canonical specs
+- [ ] unsupported-op diagnostics and decomposition workflow
+- [ ] bidirectional state/parameter mapping where needed for validation
+- [ ] cross-framework canonical-equivalence tests
 
-- repeated-subgraph mining
-- candidate AOI scoring by frequency/compression/reuse
-- provenance and benchmark history
+## v0.4 — architecture/model library
 
-## v0.5 — 4070 research harness
+- [ ] MLP/CNN/ResNet baselines
+- [ ] Transformer/ViT/DiT blocks
+- [ ] DETR / RF-DETR-like blocks
+- [ ] recurrent-depth / looped Transformer blocks
+- [ ] latent-feedback/full-bandwidth blocks
+- [ ] multi-head e2e task heads
+- [ ] model provenance and source-paper/repository metadata
 
-- fixed-budget training jobs
-- early stopping / successive halving
-- experiment database
-- Pareto/successive-constraint evaluation
-- hidden/OOD validation partitions
+## v0.5 — experiment + benchmark laboratory
 
-## v0.6 — architecture search
+- [ ] fixed-budget training jobs for RTX-4070-class hardware
+- [ ] dataset/version/split provenance
+- [ ] time-to-target-loss / convergence metrics
+- [ ] latency / VRAM / FLOP / parameter measurements
+- [ ] task metrics such as COCO AP
+- [ ] experiment database and lineage
+- [ ] early stopping / successive halving
+- [ ] Pareto / successive-constraint evaluation
+- [ ] hidden/OOD validation partitions
 
-- typed mutation operators
-- model-assisted proposal generation
-- replay of historical experiment trees
-- periodic researcher-model distillation
+## v0.6 — mutation + AOI discovery
 
-## Later
+- [ ] typed mutation operators
+- [ ] reversible architecture diffs
+- [ ] repeated-subgraph mining
+- [ ] candidate AOI scoring by frequency/compression/reuse
+- [ ] promotion of validated discovered structures into the registry
+- [ ] correlations between architectural motifs and measured outcomes
 
-- recurrent-depth / latent-feedback model families
-- vision/detection/segmentation/depth/Gaussian heads
-- architecture vocabulary that can declare new AOIs from discovered repeated structure
-- additional execution exporters only when Tinygrad-first flow is mature
+## v0.7 — automated research search
+
+- [ ] model-assisted proposal generation
+- [ ] diversity/novelty pressure
+- [ ] proxy experiments and promotion policy
+- [ ] replay of historical experiment trees
+- [ ] human proposal injection
+- [ ] learned search policy separate from executor
+- [ ] periodic researcher-model/LoRA distillation from experiment history
+
+## v0.8 — data/training co-evolution
+
+- [ ] serializable training recipes
+- [ ] optimizer/loss/curriculum mutations
+- [ ] active learning and hard-example mining
+- [ ] self-training / pseudo-label loops
+- [ ] self-play/simulation where task structure allows it
+- [ ] explicit real-world ↔ offline replay cycles
+- [ ] attribution separating architecture gains from training/data gains
+
+## Later — recursive model improvement research system
+
+- [ ] architecture, training, data, harness, and search policy as separately mutable layers
+- [ ] learned architecture proposer operating over the canonical language
+- [ ] research memory available by graph/RAG without bloating context
+- [ ] periodic consolidation into local weights/adapters
+- [ ] architecture vocabulary capable of declaring new AOIs from discovered structure
+- [ ] human-facing dashboard for inspecting, steering, and injecting new ideas
+- [ ] larger-compute confirmation only after small-compute evidence justifies it
+- [ ] additional execution exporters only when Tinygrad-first flow is mature
+
+## Rule for every checkbox
+
+A feature is not complete because code exists. It is complete when its local subsystem contract is satisfied and tests demonstrate the claimed behavior.
