@@ -1,0 +1,11 @@
+{
+  "principle": "successive constraints before scalar reward",
+  "example_target": "object detection architecture research",
+  "gates": [
+    {"name": "quality", "metric": "COCO AP", "constraint": ">= baseline"},
+    {"name": "latency", "metric": "ms/image", "objective": "minimize", "preserve": ["quality"]},
+    {"name": "training_efficiency", "metric": "time or FLOPs to target AP", "objective": "minimize", "preserve": ["quality", "latency"]},
+    {"name": "memory", "metric": "peak VRAM", "objective": "minimize", "preserve": ["quality", "latency", "training_efficiency"]}
+  ],
+  "warning": "Keep hidden and OOD validation separate from search-visible metrics to reduce benchmark overfitting."
+}
