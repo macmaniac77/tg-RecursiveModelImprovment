@@ -1,0 +1,11 @@
+{
+  "name": "ADAM_STEP",
+  "level": "sentence",
+  "meaning": "Adaptive first/second-moment optimizer update. Starter graph omits bias correction and weight decay so variants remain explicit.",
+  "math_latex": "m_t=\\beta_1m_{t-1}+(1-\\beta_1)g_t;\\quad v_t=\\beta_2v_{t-1}+(1-\\beta_2)g_t^2",
+  "tinygrad": "explicit graph operations",
+  "pytorch": "torch.optim.Adam",
+  "jax": "typically Optax adam",
+  "cpp_reference": "elementwise recurrence",
+  "lean_note": "Represent optimizer state transition as a pure function over parameter, gradient, and moments."
+}
