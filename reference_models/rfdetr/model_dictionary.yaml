@@ -1,29 +1,247 @@
-# PLACEHOLDER — populate from the real Tinygrad RF-DETR implementation.
+# RF-DETR Tinygrad source → canonical AOI dictionary
 #
-# This is executable metadata used to translate source structure into canonical
-# AOIs. Do not treat this as prose documentation.
+# This file is derived from the actual detect.py/train.py currently in this
+# directory. It maps source-level semantic blocks into the reusable tg-aoi
+# vocabulary. It is NOT a checkpoint-format conversion table.
 
 model:
   canonical_name: RF_DETR
   source_framework: tinygrad
   source_entrypoint: detect.py
   training_entrypoint: train.py
+  source_class: RFDetr
 
-blocks: {}
+blocks:
+  patch_embedding:
+    source_class: Dinov2WithRegistersPatchEmbeddings
+    aoi: PATCH_EMBEDDING
+    decomposition:
+      - CONV2D
+      - FLATTEN
+      - TRANSPOSE
 
-# Example future form:
-#
-# blocks:
-#   encoder_attention:
-#     source_pattern: "model.encoder.layers.*.self_attn"
-#     aoi: MULTIHEAD_ATTENTION
-#     parameters:
-#       q_weight: "*.q_proj.weight"
-#       k_weight: "*.k_proj.weight"
-#       v_weight: "*.v_proj.weight"
-#
-# heads:
-#   class_head:
-#     aoi: CLASSIFICATION_HEAD
-#   box_head:
-#     aoi: BOX_REGRESSION_HEAD
+  dino_embeddings:
+    source_class: WindowedDinov2WithRegistersEmbeddings
+    aoi: PATCH_EMBEDDING_WITH_POSITION_AND_REGISTERS
+    children:
+      - PATCH_EMBEDDING
+      - POSITION_INTERPOLATION
+      - CLASS_TOKEN_INSERT
+      - REGISTER_TOKEN_INSERT
+      - WINDOW_PARTITION
+
+  vit_self_attention:
+    source_class: Dinov2WithRegistersSelfAttention
+    aoi: VIT_SELF_ATTENTION
+    parameters:
+      q_weight: "query.weight"
+      q_bias: "query.bias"
+      k_weight: "key.weight"
+      k_bias: "key.bias"
+      v_weight: "value.weight"
+      v_bias: "value.bias"
+    children:
+      - LINEAR
+      - ATTENTION
+      - SOFTMAX
+
+  vit_attention:
+    source_class: Dinov2WithRegistersAttention
+    aoi: VIT_ATTENTION
+    children:
+      - VIT_SELF_ATTENTION
+      - LINEAR
+
+  vit_mlp:
+    source_class: Dinov2WithRegistersMLP
+    aoi: VIT_MLP
+    children:
+      - LINEAR
+      - ACTIVATION::GELU
+      - LINEAR
+
+  vit_block:
+    source_class: WindowedDinov2WithRegistersLayer
+    aoi: WINDOWED_DINOV2_BLOCK
+    children:
+      - LAYERNORM
+      - VIT_ATTENTION
+      - LAYERSCALE
+      - DROPPATH
+      - RESIDUAL
+      - LAYERNORM
+      - VIT_MLP
+      - LAYERSCALE
+      - DROPPATH
+      - RESIDUAL
+
+  vit_encoder:
+    source_class: WindowedDinov2WithRegistersEncoder
+    aoi: REPEATED_WINDOWED_DINOV2_BLOCK
+
+  vit_backbone:
+    source_classes:
+      - WindowedDinov2WithRegistersBackbone
+      - TinyDinoV2
+      - DINOv2Backbone
+    aoi: DINO_V2_BACKBONE
+    children:
+      - PATCH_EMBEDDING_WITH_POSITION_AND_REGISTERS
+      - REPEATED_WINDOWED_DINOV2_BLOCK
+      - FEATURE_TAP_SELECT
+      - MULTISCALE_PROJECTOR
+
+  layernorm_2d:
+    source_class: LayerNorm2d
+    aoi: NORM2D
+    children:
+      - PERMUTE
+      - LAYERNORM
+      - SCALE_BIAS
+      - PERMUTE
+
+  activation:
+    source_class: Activation
+    variants:
+      relu: ACTIVATION::RELU
+      silu: ACTIVATION::SILU
+      gelu: ACTIVATION::GELU
+
+  convx:
+    source_class: ConvX
+    aoi: CONVX
+    children:
+      - CONV2D
+      - NORM2D
+      - ACTIVATION
+
+  bottleneck:
+    source_class: Bottleneck
+    aoi: BOTTLENECK
+    children:
+      - CONVX
+      - CONVX
+      - OPTIONAL_RESIDUAL
+
+  c2f:
+    source_class: C2f
+    aoi: C2F
+    children:
+      - CONVX_AND_SPLIT
+      - REPEATED_BOTTLENECK
+      - CONCAT
+      - CONVX
+
+  multiscale_projector:
+    source_class: MultiScaleProjector
+    aoi: MULTISCALE_PROJECTOR
+    children:
+      - MULTISCALE_RESAMPLE
+      - CONCAT
+      - C2F
+      - NORM2D
+
+  bilinear_sampler:
+    source_function: bilinear_sampler_fast
+    aoi: BILINEAR_SAMPLER
+
+  ms_deform_attention:
+    source_class: MSDeformAttnFast
+    aoi: MS_DEFORM_ATTN
+    parameters:
+      sampling_offsets: "sampling_offsets.*"
+      attention_weights: "attention_weights.*"
+      value_proj: "value_proj.*"
+      output_proj: "output_proj.*"
+    children:
+      - LINEAR
+      - SOFTMAX
+      - DEFORMABLE_SAMPLE_LOCATIONS
+      - BILINEAR_SAMPLER
+      - WEIGHTED_SUM
+      - LINEAR
+
+  hybrid_encoder:
+    source_class: HybridEncoder
+    aoi: HYBRID_ENCODER
+    children:
+      - FLATTEN_AND_CONCAT_FEATURE_LEVELS
+      - ENCODER_PROPOSALS
+      - TOPK_PROPOSAL_MEMORY
+      - TOPK_PROPOSAL_BOXES
+
+  decoder_self_attention:
+    source_method: TransformerDecoderLayer._self_attention
+    aoi: MULTIHEAD_SELF_ATTENTION
+
+  decoder_layer:
+    source_class: TransformerDecoderLayer
+    aoi: DETR_DECODER_LAYER
+    children:
+      - MULTIHEAD_SELF_ATTENTION
+      - RESIDUAL
+      - LAYERNORM
+      - MS_DEFORM_ATTN
+      - RESIDUAL
+      - LAYERNORM
+      - RELU_FFN
+      - RESIDUAL
+      - LAYERNORM
+
+  decoder:
+    source_class: TransformerDecoder
+    aoi: DETR_DECODER
+    children:
+      - SINE_POSITION_EMBED_AND_MLP
+      - REPEATED_DETR_DECODER_LAYER
+      - REFERENCE_POINT_REFINEMENT
+
+  detection_mlp:
+    source_class: DetectionMLP
+    aoi: DETECTION_MLP
+    children:
+      - REPEATED_LINEAR_RELU
+
+  rfdetr:
+    source_class: RFDetr
+    aoi: RF_DETR
+    children:
+      - DINO_V2_BACKBONE
+      - INPUT_PROJECTIONS
+      - HYBRID_ENCODER
+      - QUERY_AND_REFERENCE_EMBEDDINGS
+      - DETR_DECODER
+      - CLASSIFICATION_HEAD
+      - BOX_REGRESSION_HEAD
+
+training_blocks:
+  box_iou:
+    source_functions:
+      - box_area
+      - box_iou
+      - generalized_box_iou
+    aoi: BOX_IOU
+
+  matcher:
+    source_class: HungarianMatcher
+    aoi: HUNGARIAN_MATCHER
+    execution_domain: cpu_no_grad
+
+  criterion:
+    source_class: SetCriterion
+    aoi: DETR_SET_CRITERION
+    children:
+      - HUNGARIAN_MATCHER
+      - IA_BCE_OR_FOCAL_CLASSIFICATION_LOSS
+      - L1_BOX_LOSS
+      - GIOU_LOSS
+      - WEIGHTED_SUM
+
+  optimizer:
+    source: "tinygrad.nn.optim.AdamW"
+    aoi: ADAMW_STEP
+
+notes:
+  - "The dictionary maps architecture/training semantics, not file formats."
+  - "CONV2D remains a semantic AOI; its eventual lowest-level expansion should target the chosen Tinygrad/UOp substrate."
+  - "An AOI may remain partially semantic until a tested primitive expansion exists."

@@ -1,24 +1,99 @@
-# PLACEHOLDER — instance-level map for the supplied RF-DETR model.
+# RF-DETR architecture map derived from the current Tinygrad source.
 #
-# Populate after inspecting the real model object and checkpoint.
-#
-# Expected future contents:
-#
-# model:
-#   id: rfdetr_baseline
-#   root_aoi: RF_DETR
-#
-# nodes:
-#   - source_path: model.encoder.layers.0.self_attn
-#     canonical_id: encoder.0.attention
-#     aoi: MULTIHEAD_ATTENTION
-#     parameter_ids:
-#       - ...
-#
-# Each source object used in the canonical architecture should be traceable here.
+# This is a structural map, not yet a fully materialized parameter-instance map.
+# Exact parameter IDs should be added after instantiating the baseline model and
+# walking tinygrad.nn.state.get_state_dict(model).
 
 model:
-  id: rfdetr_placeholder
+  id: rfdetr_tinygrad_current
   root_aoi: RF_DETR
+  source_class: RFDetr
+  source_file: detect.py
 
-nodes: []
+nodes:
+  - source_path: "RFDetr.backbone[0]"
+    source_class: DINOv2Backbone
+    canonical_id: backbone
+    aoi: DINO_V2_BACKBONE
+
+  - source_path: "RFDetr.backbone[0].encoder.encoder.embeddings.patch_embeddings"
+    source_class: Dinov2WithRegistersPatchEmbeddings
+    canonical_id: backbone.patch_embedding
+    aoi: PATCH_EMBEDDING
+
+  - source_path_pattern: "RFDetr.backbone[0].encoder.encoder.encoder.layer[*]"
+    source_class: WindowedDinov2WithRegistersLayer
+    canonical_id_pattern: "backbone.encoder.block[*]"
+    aoi: WINDOWED_DINOV2_BLOCK
+
+  - source_path: "RFDetr.backbone[0].projector"
+    source_class: MultiScaleProjector
+    canonical_id: backbone.projector
+    aoi: MULTISCALE_PROJECTOR
+
+  - source_path_pattern: "RFDetr.input_proj[*]"
+    source_class: tinygrad.nn.Conv2d
+    canonical_id_pattern: "input_projection[*]"
+    aoi: CONV2D
+
+  - source_path: "RFDetr.encoder"
+    source_class: HybridEncoder
+    canonical_id: encoder
+    aoi: HYBRID_ENCODER
+
+  - source_path_pattern: "RFDetr.decoder.layers[*]"
+    source_class: TransformerDecoderLayer
+    canonical_id_pattern: "decoder.layer[*]"
+    aoi: DETR_DECODER_LAYER
+
+  - source_path_pattern: "RFDetr.decoder.layers[*].cross_attn"
+    source_class: MSDeformAttnFast
+    canonical_id_pattern: "decoder.layer[*].cross_attention"
+    aoi: MS_DEFORM_ATTN
+
+  - source_path: "RFDetr.decoder"
+    source_class: TransformerDecoder
+    canonical_id: decoder
+    aoi: DETR_DECODER
+
+  - source_path: "RFDetr.class_head"
+    source_class: tinygrad.nn.Linear
+    canonical_id: heads.classification
+    aoi: CLASSIFICATION_HEAD
+
+  - source_path: "RFDetr.box_head"
+    source_class: DetectionMLP
+    canonical_id: heads.box_regression
+    aoi: BOX_REGRESSION_HEAD
+
+  - source_path: "RFDetr.query_feat"
+    source_class: tinygrad.nn.Embedding
+    canonical_id: queries.features
+    aoi: QUERY_EMBEDDING
+
+  - source_path: "RFDetr.refpoint_embed"
+    source_class: tinygrad.nn.Embedding
+    canonical_id: queries.reference_points
+    aoi: REFERENCE_POINT_EMBEDDING
+
+training:
+  - source_path: "train.HungarianMatcher"
+    canonical_id: training.matcher
+    aoi: HUNGARIAN_MATCHER
+
+  - source_path: "train.SetCriterion"
+    canonical_id: training.criterion
+    aoi: DETR_SET_CRITERION
+
+  - source_path: "train.nn.optim.AdamW"
+    canonical_id: training.optimizer
+    aoi: ADAMW_STEP
+
+parameter_materialization:
+  status: pending_runtime_walk
+  instructions:
+    - "Instantiate the baseline RFDetr with the exact package.yaml config."
+    - "Call tinygrad.nn.state.get_state_dict(model)."
+    - "For each parameter key, assign owning canonical_id using the source paths above."
+    - "Record shape, dtype, checkpoint key, canonical parameter ID, and inheritance policy."
+    - "Validate the map against the loaded safetensors checkpoint."
