@@ -295,3 +295,41 @@ It should help answer:
 - Are we improving the model or merely overfitting the benchmark?
 - Where is the search repeatedly finding useful structure?
 - Where should a human intervene?
+
+## Run the implemented read-only viewer
+
+From the repository root:
+
+```bash
+python -m pip install -e '.[viewer]'
+python -m tgaoi.viewer --output artifacts/viewer.html
+```
+
+Open `artifacts/viewer.html` in a browser. The export embeds the map, dictionary,
+and graph catalog; it needs no server, CDN, model import, weights, or GPU.
+Regenerate it after changing source artifacts. Treat the exported file as a copy
+of the source metadata when sharing it.
+
+Optional canonical graph inspection:
+
+```bash
+python -m tgaoi.viewer --graph path/to/model.arch.json --output artifacts/viewer.html
+```
+
+Implemented: expandable mapped hierarchy, lazy dictionary decomposition,
+node/source details, declared parameter prefixes, capability audit with search,
+semantic block overview, canonical node/dependency table, and a measured-loop
+review snapshot. Dictionary and graph definitions are displayed separately to
+expose disagreement. Unknown counts and missing definitions stay unknown.
+The overview is composition, not inferred tensor dataflow or a completed Stage 2
+paper diagram. There are no editing, execution, or promotion controls.
+
+The normalized export schema (`schema_version: 1`) contains `model`, `nodes`
+(with canonical `id`, display-only `parent`, source mapping and section),
+`blocks` (dictionary definitions), `catalog` (graph plus capability audit),
+`parameter_materialization`, `notes`, and optional canonical `graphs`.
+Parent relationships use the longest existing canonical ID prefix. Symbolic
+wildcards are preserved; repeated counts are never guessed. AOI expansion has
+cycle guards. Serialized data escapes HTML delimiters and UI values use text nodes.
+
+Review findings and validation limits: [review](../docs/REVIEW_VIEWER_AND_LOOP.md).

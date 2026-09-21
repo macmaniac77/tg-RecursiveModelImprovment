@@ -17,6 +17,13 @@ tinygrad = ["tinygrad"]
 torch = ["torch"]
 jax = ["jax"]
 dev = ["pytest>=8", "numpy"]
+viewer = ["PyYAML>=6"]
+
+[project.scripts]
+tgaoi-viewer = "tgaoi.viewer:main"
+
+[tool.setuptools.package-data]
+tgaoi = ["viewer.html"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

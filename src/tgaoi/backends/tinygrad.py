@@ -4,6 +4,12 @@ from typing import Any
 from ..ir import Graph
 
 
+SUPPORTED_OPS = frozenset({
+    "CONST", "IDENTITY", "ADD", "SUB", "MUL", "DIV", "MAXIMUM", "EXP",
+    "SQRT", "RSQRT", "MATMUL", "TRANSPOSE", "REDUCE_SUM", "REDUCE_MEAN", "REDUCE_MAX",
+})
+
+
 class TinygradBackend:
     """Executable Tinygrad backend for the starter canonical alphabet.
 

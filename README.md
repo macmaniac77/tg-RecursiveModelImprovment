@@ -105,3 +105,15 @@ Tinygrad
 Then prove equivalence against a tiny PyTorch Transformer block.
 
 See `AGENTS.md`, `docs/ROADMAP.md`, and the README inside each subsystem.
+
+## Human architecture viewer
+
+```bash
+python -m pip install -e '.[viewer]'
+python -m tgaoi.viewer --output artifacts/viewer.html
+```
+
+Open the resulting HTML locally to inspect RF-DETR mappings, AOI decomposition,
+parameter declarations and execution gaps. See [viewer instructions](viewer/README.md)
+and the [primitive / measured-loop review](docs/REVIEW_VIEWER_AND_LOOP.md).
+The measured recursive-improvement loop is still a design, not a completed runner.

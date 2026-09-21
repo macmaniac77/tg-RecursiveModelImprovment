@@ -57,3 +57,16 @@ Rules:
 7. Discovered repeated subgraphs may be proposed as new AOIs, but should only be promoted after tests and measured reuse justify them.
 
 Long-term objective: architecture reasoning can occur at whatever abstraction level is useful, while exact reducibility is always retained.
+
+## Capability review (2026-09-21)
+
+`audit.catalog()` exposes the 28 default graphs plus GELU/SILU activation variants.
+Only five default graphs currently contain exclusively backend-supported ops:
+MATMUL, SOFTMAX, RMSNORM, LINEAR, and ADAM_STEP. The new NumPy comparison tests
+cover these, including stable softmax and all optimizer state outputs. ADAM_STEP
+is explicitly **uncorrected Adam moments**, not standard Adam or AdamW.
+ATTENTION still stops at AOI::SOFTMAX because nested execution is absent.
+
+The viewer reports unsupported primitives, missing child definitions, and arity
+mismatches against default child signatures. This is a capability audit, not a
+complete shape/type validator or proof of source-model equivalence.

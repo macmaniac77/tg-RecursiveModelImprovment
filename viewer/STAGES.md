@@ -4,17 +4,20 @@ This file is the implementation checklist for the viewer. See `README.md` for th
 
 ## Stage 1 — read-only architecture explorer
 
-- [ ] backend can load `architecture_map.yaml`
-- [ ] backend can load `model_dictionary.yaml`
-- [ ] normalized viewer schema exists
-- [ ] RF-DETR hierarchy renders
-- [ ] AOI nodes expand/collapse
-- [ ] selected-node detail panel
-- [ ] source path/class/function shown
-- [ ] child AOIs shown
-- [ ] parameter ownership metadata shown when available
-- [ ] local run instructions documented
-- [ ] no editing capability
+Implemented as an offline HTML export (`python -m tgaoi.viewer`).
+Parameter metadata remains declared prefixes; runtime counts/IDs are explicitly pending.
+
+- [x] backend can load `architecture_map.yaml`
+- [x] backend can load `model_dictionary.yaml`
+- [x] normalized viewer schema exists
+- [x] RF-DETR hierarchy renders
+- [x] AOI nodes expand/collapse
+- [x] selected-node detail panel
+- [x] source path/class/function shown
+- [x] child AOIs shown
+- [x] parameter ownership metadata shown when available
+- [x] local run instructions documented
+- [x] no editing capability
 
 Exit test:
 A user can inspect RF-DETR from root AOI to nested attention block without opening source code.

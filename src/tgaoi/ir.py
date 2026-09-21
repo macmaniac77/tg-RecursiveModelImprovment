@@ -51,6 +51,8 @@ class Graph:
     def validate(self) -> None:
         known = set(self.inputs)
         for node in self.nodes:
+            if node.id in known:
+                raise ValueError(f"duplicate graph value id: {node.id}")
             missing = [x for x in node.inputs if x not in known]
             if missing:
                 raise ValueError(f"{node.id}: unknown inputs {missing}")

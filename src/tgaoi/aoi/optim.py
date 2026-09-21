@@ -4,7 +4,7 @@ from ..ir import Graph, Node, TensorType
 
 
 def adam_graph() -> Graph:
-    """One conceptual Adam update step, intentionally explicit and reducible."""
+    """Uncorrected Adam moment update; bias correction is not implemented."""
     t = TensorType(("...",))
     scalar = TensorType(())
     g = Graph(
@@ -21,6 +21,7 @@ def adam_graph() -> Graph:
             "one": scalar,
         },
         outputs=["param_next", "m_next", "v_next"],
+        metadata={"bias_correction": False, "warning": "Not standard bias-corrected Adam or AdamW."},
     )
     g.add(Node("b1m", "MUL", ["beta1", "m"]))
     g.add(Node("omb1", "SUB", ["one", "beta1"]))
