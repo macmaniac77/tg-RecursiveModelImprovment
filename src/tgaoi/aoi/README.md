@@ -2,7 +2,32 @@
 
 AOIs are named reusable function blocks built from lower-level canonical operations or other AOIs.
 
-Examples:
+## Current inventory
+
+The package currently exports **28 AOI graph builders**:
+
+- Core math: `MATMUL`, `SOFTMAX`
+- Core NN: `RMSNORM`, `LINEAR`, `ATTENTION`
+- Optimization: `ADAM_STEP`
+- Vision: activation, LayerNorm, Conv2D, patch embedding, ViT self-attention, ViT MLP, windowed DINOv2/ViT block, ConvX, bottleneck, C2f, multiscale projector, DINOv2 backbone
+- Detection: bilinear sampler, multi-scale deformable attention, detection MLP, DETR decoder layer, DETR decoder, hybrid encoder, RF-DETR
+- Training: box IoU, Hungarian matcher, DETR set criterion
+
+Every exported builder constructs a `Graph`, calls `Graph.validate()`, and is included in `tests/test_aoi.py`.
+
+### What "validated" means today
+
+The current test proves **structural graph validity**: the graph can be constructed, its references satisfy the present IR validator, and it declares outputs.
+
+It does **not** yet mean every AOI is recursively closed or numerically equivalent to its source implementation.
+
+The lower/core AOIs are substantially decomposed into canonical operations. Several higher-level RF-DETR-derived AOIs intentionally reference named child AOIs that do not yet have exported implementations. Examples include `LAYERSCALE`, `DROPPATH`, `NORM2D`, `MULTIHEAD_SELF_ATTENTION`, proposal-generation/refinement blocks, RF-DETR heads, and several loss/cost helpers.
+
+Those names are design commitments, not claims of completed execution support. Per the repository contract, they must be implemented and equivalence-tested before the corresponding parent AOI can be called fully recursive/executable.
+
+## Destination vocabulary
+
+Examples include:
 
 - MATMUL
 - SOFTMAX
