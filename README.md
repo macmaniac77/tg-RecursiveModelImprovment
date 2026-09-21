@@ -54,7 +54,7 @@ Implemented now:
 
 - framework-neutral `Graph`, `Node`, and `TensorType`
 - JSON round-trip serialization
-- starter AOIs: `SOFTMAX`, `RMSNORM`, `LINEAR`, `ATTENTION`, `ADAM_STEP`
+- **28 exported AOI graph builders** spanning core math/NN, optimization, vision, RF-DETR/detection, and training; all are covered by structural graph validation, while higher-level RF-DETR-derived AOIs still contain explicitly named child AOIs awaiting recursive implementation
 - a minimal Tinygrad executor for the starter alphabet
 - PyTorch FX `Linear → ReLU → Linear` lowering with explicit weights/state
 - a committed PyTorch→IR→Tinygrad numerical equivalence test
