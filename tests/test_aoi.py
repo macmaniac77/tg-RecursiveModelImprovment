@@ -1,4 +1,5 @@
 from tgaoi.aoi import (
+    matmul_graph,
     softmax_graph,
     rmsnorm_graph,
     linear_graph,
@@ -29,8 +30,9 @@ from tgaoi.aoi import (
 )
 
 
-def test_starter_aois_validate():
+def test_exported_aoi_graphs_validate():
     graphs = [
+        matmul_graph(),
         softmax_graph(),
         rmsnorm_graph(),
         linear_graph(),
@@ -59,6 +61,7 @@ def test_starter_aois_validate():
         hungarian_matcher_graph(),
         detr_set_criterion_graph(),
     ]
+    assert len(graphs) == 28
     for graph in graphs:
         graph.validate()
         assert graph.outputs
