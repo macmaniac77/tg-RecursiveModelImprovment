@@ -6,9 +6,11 @@ from .backends.tinygrad import SUPPORTED_OPS
 def catalog():
     """Default graph from every public builder, plus named activation variants."""
     graphs = {g.name: g for name in aoi.__all__ for g in [getattr(aoi, name)()]}
-    for kind in ("gelu", "silu"):
+    for kind in ("gelu", "silu", "sigmoid", "tanh"):
         g = aoi.activation_graph(kind)
         graphs[g.name] = g
+    avg = aoi.pool2d_graph("avg")
+    graphs[avg.name] = avg
     return graphs
 
 

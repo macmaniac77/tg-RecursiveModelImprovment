@@ -4,63 +4,60 @@ from ..ir import Graph, Node, TensorType
 
 
 def activation_graph(kind: str = "relu") -> Graph:
-    """Canonical activation AOI.
-
-    The RF-DETR Tinygrad port currently uses relu, silu and exact erf-based gelu.
-    These remain named AOIs until their primitive/UOp lowering is implemented.
-    """
+    if kind not in ("relu", "silu", "gelu", "sigmoid", "tanh"):
+        raise ValueError(f"unsupported activation: {kind}")
     x = TensorType(("...", "D"))
-    g = Graph(
-        name=f"ACTIVATION::{kind.upper()}",
-        inputs={"x": x},
-        outputs=["out"],
-        metadata={
-            "level": "word",
-            "source_examples": ["reference_models/rfdetr/detect.py::Activation"],
-            "lowering_status": "semantic_aoi_pending_primitive_expansion",
-        },
-    )
-    g.add(Node("out", f"ACTIVATION_PRIMITIVE::{kind.upper()}", ["x"], output_type=x))
+    g = Graph(f"ACTIVATION::{kind.upper()}", {"x": x}, ["out"])
+    if kind == "relu":
+        g.add(Node("zero", "CONST", attrs={"value": 0.0}))
+        g.add(Node("out", "MAXIMUM", ["x", "zero"], output_type=x))
+    elif kind in ("sigmoid", "silu"):
+        g.add(Node("sigmoid", "SIGMOID", ["x"]))
+        g.add(Node("out", "MUL" if kind == "silu" else "IDENTITY",
+                   ["x", "sigmoid"] if kind == "silu" else ["sigmoid"], output_type=x))
+    elif kind == "tanh":
+        g.add(Node("out", "TANH", ["x"], output_type=x))
+    else:
+        g.add(Node("scale", "CONST", attrs={"value": 2 ** -0.5}))
+        g.add(Node("scaled", "MUL", ["x", "scale"]))
+        g.add(Node("erf", "ERF", ["scaled"]))
+        g.add(Node("one", "CONST", attrs={"value": 1.0}))
+        g.add(Node("plus", "ADD", ["erf", "one"]))
+        g.add(Node("half", "CONST", attrs={"value": 0.5}))
+        g.add(Node("gate", "MUL", ["plus", "half"]))
+        g.add(Node("out", "MUL", ["x", "gate"], output_type=x))
+    g.metadata["semantics"] = "elementwise; GELU uses erf, not tanh approximation"
     g.validate()
     return g
 
 
 def layernorm_graph() -> Graph:
     x = TensorType(("...", "D"))
-    g = Graph(
-        name="LAYERNORM",
-        inputs={"x": x, "weight": TensorType(("D",)), "bias": TensorType(("D",)), "eps": TensorType(())},
-        outputs=["out"],
-        metadata={"level": "word", "lowering_status": "pending_mean_variance_primitive_expansion"},
-    )
-    g.add(Node("norm", "LAYERNORM_PRIMITIVE", ["x", "eps"]))
+    g = Graph("LAYERNORM", {"x": x, "weight": TensorType(("D",)),
+              "bias": TensorType(("D",)), "eps": TensorType(())}, ["out"])
+    g.add(Node("mean", "REDUCE_MEAN", ["x"], {"axis": -1, "keepdim": True}))
+    g.add(Node("centered", "SUB", ["x", "mean"]))
+    g.add(Node("squared", "MUL", ["centered", "centered"]))
+    g.add(Node("variance", "REDUCE_MEAN", ["squared"], {"axis": -1, "keepdim": True}))
+    g.add(Node("den", "ADD", ["variance", "eps"]))
+    g.add(Node("inv", "RSQRT", ["den"]))
+    g.add(Node("norm", "MUL", ["centered", "inv"]))
     g.add(Node("scaled", "MUL", ["norm", "weight"]))
     g.add(Node("out", "ADD", ["scaled", "bias"], output_type=x))
+    g.metadata["semantics"] = "last-axis affine normalization, population variance"
     g.validate()
     return g
 
 
-def conv2d_graph() -> Graph:
-    """Semantic convolution AOI.
-
-    Convolution is intentionally represented as a reusable AOI, not as an
-    irreducible alphabet letter. A later lowering pass should expand it into the
-    chosen Tinygrad/UOp-level substrate while preserving this semantic wrapper.
-    """
-    g = Graph(
-        name="CONV2D",
-        inputs={
-            "x": TensorType(("N", "CIN", "H", "W")),
-            "weight": TensorType(("COUT", "CIN_PER_GROUP", "KH", "KW")),
-        },
-        outputs=["out"],
-        metadata={
-            "level": "word",
-            "lowering_status": "pending_uop_expansion",
-            "attributes": ["stride", "padding", "dilation", "groups", "bias"],
-        },
-    )
-    g.add(Node("out", "CONV2D_PRIMITIVE", ["x", "weight"], output_type=TensorType(("N", "COUT", "OH", "OW"))))
+def conv2d_graph(stride=1, padding=0, dilation=1, groups=1, bias=False) -> Graph:
+    inputs = {"x": TensorType(("N", "CIN", "H", "W")),
+              "weight": TensorType(("COUT", "CIN_PER_GROUP", "KH", "KW"))}
+    if bias:
+        inputs["bias"] = TensorType(("COUT",))
+    g = Graph("CONV2D", inputs, ["out"], metadata={"semantics": "NCHW cross-correlation; Tinygrad tensor-level lowering"})
+    g.add(Node("out", "CONV2D", list(inputs),
+               {"stride": stride, "padding": padding, "dilation": dilation, "groups": groups},
+               output_type=TensorType(("N", "COUT", "OH", "OW"))))
     g.validate()
     return g
 

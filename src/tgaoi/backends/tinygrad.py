@@ -5,6 +5,7 @@ from ..ir import Graph
 
 
 SUPPORTED_OPS = frozenset({
+    "SIGMOID", "TANH", "ERF", "CONV2D", "RESHAPE", "CONCAT", "SLICE", "MAX_POOL2D", "AVG_POOL2D",
     "CONST", "IDENTITY", "ADD", "SUB", "MUL", "DIV", "MAXIMUM", "EXP",
     "SQRT", "RSQRT", "MATMUL", "TRANSPOSE", "REDUCE_SUM", "REDUCE_MEAN", "REDUCE_MAX",
 })
@@ -48,7 +49,25 @@ class TinygradBackend:
             xs = [env[i] for i in n.inputs]
             op = n.op
 
-            if op == "CONST":
+            if op == "SIGMOID":
+                env[n.id] = xs[0].sigmoid()
+            elif op == "TANH":
+                env[n.id] = xs[0].tanh()
+            elif op == "ERF":
+                env[n.id] = xs[0].erf()
+            elif op == "CONV2D":
+                env[n.id] = xs[0].conv2d(xs[1], xs[2] if len(xs) > 2 else None, **n.attrs)
+            elif op == "RESHAPE":
+                env[n.id] = xs[0].reshape(n.attrs["shape"])
+            elif op == "CONCAT":
+                env[n.id] = xs[0].cat(*xs[1:], dim=n.attrs["axis"])
+            elif op == "SLICE":
+                indices = [slice(None)] * len(xs[0].shape)
+                indices[n.attrs["axis"]] = slice(n.attrs["start"], n.attrs["stop"])
+                env[n.id] = xs[0][tuple(indices)]
+            elif op in ("MAX_POOL2D", "AVG_POOL2D"):
+                env[n.id] = getattr(xs[0], op.lower())(**n.attrs)
+            elif op == "CONST":
                 env[n.id] = Tensor(n.attrs["value"])
             elif op == "IDENTITY":
                 env[n.id] = xs[0]

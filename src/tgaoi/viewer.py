@@ -2,6 +2,7 @@
 from __future__ import annotations
 import argparse
 import json
+import gzip
 from pathlib import Path
 from .audit import catalog, audit_graph
 from .ir import Graph
@@ -51,9 +52,14 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--package", type=Path, default=Path("reference_models/rfdetr"))
     parser.add_argument("--graph", action="append", type=Path, default=[], help="Canonical graph JSON; repeat for multiple graphs")
+    parser.add_argument("--examples", type=Path, help="Revision-pinned Tinygrad source catalog JSON")
     parser.add_argument("--output", type=Path, default=Path("artifacts/viewer.html"))
     args = parser.parse_args(argv)
     data = load_package(args.package)
+    if args.examples:
+        data["examples"] = json.loads(gzip.decompress(args.examples.read_bytes()) if args.examples.suffix == '.gz' else args.examples.read_bytes())
+        if data["examples"].get("schema_version") != 1:
+            raise ValueError("Unsupported example catalog schema")
     for path in args.graph:
         graph = Graph.from_dict(json.loads(path.read_text()))
         data["graphs"].append({"graph": graph.to_dict(), "audit": audit_graph(graph)})

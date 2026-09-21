@@ -38,3 +38,12 @@ __all__ = [
     "rfdetr_graph", "box_iou_graph", "hungarian_matcher_graph",
     "detr_set_criterion_graph",
 ]
+
+from .reusable import (
+    residual_graph, batchnorm_inference_graph, pool2d_graph, mlp_graph, swiglu_graph,
+    yolov8_conv_graph, yolov8_bottleneck_graph, yolov8_c2f_graph, yolov8_sppf_graph,
+)
+__all__ += [
+    'residual_graph', 'batchnorm_inference_graph', 'pool2d_graph', 'mlp_graph', 'swiglu_graph',
+    'yolov8_conv_graph', 'yolov8_bottleneck_graph', 'yolov8_c2f_graph', 'yolov8_sppf_graph',
+]

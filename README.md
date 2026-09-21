@@ -117,3 +117,16 @@ Open the resulting HTML locally to inspect RF-DETR mappings, AOI decomposition,
 parameter declarations and execution gaps. See [viewer instructions](viewer/README.md)
 and the [primitive / measured-loop review](docs/REVIEW_VIEWER_AND_LOOP.md).
 The measured recursive-improvement loop is still a design, not a completed runner.
+
+### Tinygrad example catalog and reusable blocks
+
+The viewer can now browse the pinned Tinygrad example/shared-model source catalog:
+
+```bash
+python -m tgaoi.viewer --examples reference_models/tinygrad/catalog.json.gz --output artifacts/tinygrad-viewer.html
+```
+
+All 78 Python files in the catalog are source-inspectable. Reusable numerical
+blocks include YOLOv8 Conv/Bottleneck/C2f/SPPF, dense MLP, SwiGLU and more.
+Source coverage is not full-model executable coverage; unresolved calls remain
+explicit. See [coverage and regeneration](reference_models/tinygrad/README.md).

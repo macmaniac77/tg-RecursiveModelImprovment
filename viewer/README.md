@@ -333,3 +333,12 @@ wildcards are preserved; repeated counts are never guessed. AOI expansion has
 cycle guards. Serialized data escapes HTML delimiters and UI values use text nodes.
 
 Review findings and validation limits: [review](../docs/REVIEW_VIEWER_AND_LOOP.md).
+
+## Tinygrad examples
+
+Add `--examples reference_models/tinygrad/catalog.json.gz` to the export command.
+The **Tinygrad examples** tab searches every pinned example/shared-model file,
+browses source definitions and calls, follows cross-file source references, and
+links supported YOLOv8 components to reusable library AOIs. Gzip and plain JSON
+catalogs are accepted. This tab displays source structure, not inferred tensor
+edges. See [catalog scope and regeneration](../reference_models/tinygrad/README.md).

@@ -4,7 +4,7 @@ AOIs are named reusable function blocks built from lower-level canonical operati
 
 ## Current inventory
 
-The package currently exports **28 AOI graph builders**:
+The original inventory contains **28 AOI graph builders** (now expanded to 37; see below):
 
 - Core math: `MATMUL`, `SOFTMAX`
 - Core NN: `RMSNORM`, `LINEAR`, `ATTENTION`
@@ -70,3 +70,18 @@ ATTENTION still stops at AOI::SOFTMAX because nested execution is absent.
 The viewer reports unsupported primitives, missing child definitions, and arity
 mismatches against default child signatures. This is a capability audit, not a
 complete shape/type validator or proof of source-model equivalence.
+
+## Tinygrad reusable-block expansion
+
+The current public inventory is **37 builders / 42 default-and-variant graphs**,
+with **23 graphs having complete backend operation coverage**. The earlier dated
+five-AOI capability review above describes the pre-expansion baseline.
+
+Nine builders were added: residual, frozen BatchNorm, pooling, dense MLP,
+SwiGLU, and YOLOv8 Conv/Bottleneck/C2f/SPPF. Existing activations, LayerNorm,
+Conv2D and unmasked attention now execute. See
+[semantics, source mappings and limitations](../../../reference_models/tinygrad/README.md).
+
+`compose.inline` requires exact child bindings and namespaces every node while
+retaining child-instance provenance. This is explicit composition; it does not
+make the remaining source-level AOI sketches recursively executable.

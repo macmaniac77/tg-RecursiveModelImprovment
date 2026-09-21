@@ -6,3 +6,7 @@ __pycache__/
 dist/
 build/
 experiments/runs/
+
+# Regenerable offline Tinygrad catalog export
+artifacts/tinygrad-viewer.html
+reference_models/tinygrad/catalog.json

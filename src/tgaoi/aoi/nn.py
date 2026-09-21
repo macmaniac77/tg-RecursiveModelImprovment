@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from ..ir import Graph, Node, TensorType
+from ..compose import inline
+from .math import softmax_graph
 
 
 def rmsnorm_graph(eps: float = 1e-6) -> Graph:
@@ -50,7 +52,8 @@ def attention_graph() -> Graph:
     g.add(Node("kt", "TRANSPOSE", ["k"], {"axes": (-1, -2)}))
     g.add(Node("scores", "MATMUL", ["q", "kt"]))
     g.add(Node("scaled", "MUL", ["scores", "scale"]))
-    g.add(Node("weights", "AOI::SOFTMAX", ["scaled"], {"axis": -1}))
-    g.add(Node("out", "MATMUL", ["weights", "v"], output_type=qkv, semantic_tags=["attention"]))
+    g.metadata["semantics"] = "unmasked attention; explicit scale; no dropout"
+    weights = inline(g, softmax_graph(), "softmax", {"x": "scaled"})[0]
+    g.add(Node("out", "MATMUL", [weights, "v"], output_type=qkv, semantic_tags=["attention"]))
     g.validate()
     return g
