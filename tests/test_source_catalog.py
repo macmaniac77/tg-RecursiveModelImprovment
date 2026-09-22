@@ -42,7 +42,7 @@ def test_no_false_mapping_from_names_or_shadowed_import():
 def test_pinned_catalog_has_every_example_and_yolo_library_links():
     root=Path(__file__).resolve().parents[1]
     data=json.loads(gzip.decompress((root/'reference_models/tinygrad/catalog.json.gz').read_bytes()))
-    assert data['summary']['python_files']==78
+    assert data['summary']['python_files']==86
     assert data['summary']['parse_errors']==0
     files={f['path']:f for f in data['files']}
     for path in ['examples/yolov8.py','examples/llama.py','examples/whisper.py','extra/models/resnet.py']:
@@ -50,3 +50,12 @@ def test_pinned_catalog_has_every_example_and_yolo_library_links():
     yolo={s['name']:s for s in files['examples/yolov8.py']['symbols']}
     assert yolo['C2f']['library_aoi']=='YOLOV8_C2F'
     assert yolo['Conv_Block']['library_aoi']=='YOLOV8_CONV'
+
+
+def test_qwen_source_subgraph_links():
+    root=Path(__file__).resolve().parents[1]
+    data=json.loads(gzip.decompress((root/'reference_models/tinygrad/catalog.json.gz').read_bytes()))
+    f=next(f for f in data['files'] if f['path']=='tinygrad/llm/model.py')
+    symbols={s['name']:s for s in f['symbols']}
+    assert 'GATED_DELTA_SCAN' in symbols['GatedDeltaNetBlock._attention']['library_aois']
+    assert symbols['apply_rope']['library_aois']==['ROPE_HALF_SPLIT']

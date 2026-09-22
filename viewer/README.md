@@ -342,3 +342,6 @@ browses source definitions and calls, follows cross-file source references, and
 links supported YOLOv8 components to reusable library AOIs. Gzip and plain JSON
 catalogs are accepted. This tab displays source structure, not inferred tensor
 edges. See [catalog scope and regeneration](../reference_models/tinygrad/README.md).
+
+The source catalog now includes `tinygrad/llm/`. A source method can link several
+reusable AOIs; Qwen-capable attention and DeltaNet methods expose these as buttons.

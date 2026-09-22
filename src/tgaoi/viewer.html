@@ -26,7 +26,8 @@ function sourceSymbol(file,symbol){
   el('p',file.path+':'+symbol.line+' · '+symbol.kind,detail);
   el('div','Source projection only. Calls are lexical occurrences, not tensor execution order or verified runtime bindings.',detail,'notice');
   const link=el('a','Open pinned upstream source',detail);link.href=sourceURL(file)+'#L'+symbol.line;link.target='_blank';link.rel='noopener noreferrer';
-  if(symbol.library_aoi){el('h3','Reusable library block',detail);el('button',symbol.library_aoi,detail).onclick=()=>select(symbol.library_aoi);el('p',symbol.library_scope,detail);}
+  const libraryBlocks=symbol.library_aois||(symbol.library_aoi?[symbol.library_aoi]:[]);
+  if(libraryBlocks.length){el('h3','Reusable library blocks',detail);for(const name of libraryBlocks)el('button',name,detail).onclick=()=>select(name);el('p',symbol.library_scope,detail);}
   json('Signature',symbol.signature);const children=file.symbols.filter(x=>x.parent===symbol.id);
   if(children.length){el('h3','Nested definitions',detail);for(const child of children)el('button',child.name,detail).onclick=()=>sourceSymbol(file,child);}
   el('h3',symbol.calls.length+' source calls',detail);

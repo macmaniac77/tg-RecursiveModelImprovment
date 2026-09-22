@@ -5,6 +5,7 @@ from ..ir import Graph
 
 
 SUPPORTED_OPS = frozenset({
+    "COS", "SIN", "LOG",
     "SIGMOID", "TANH", "ERF", "CONV2D", "RESHAPE", "CONCAT", "SLICE", "MAX_POOL2D", "AVG_POOL2D",
     "CONST", "IDENTITY", "ADD", "SUB", "MUL", "DIV", "MAXIMUM", "EXP",
     "SQRT", "RSQRT", "MATMUL", "TRANSPOSE", "REDUCE_SUM", "REDUCE_MEAN", "REDUCE_MAX",
@@ -49,7 +50,9 @@ class TinygradBackend:
             xs = [env[i] for i in n.inputs]
             op = n.op
 
-            if op == "SIGMOID":
+            if op in ("COS", "SIN", "LOG"):
+                env[n.id] = getattr(xs[0], op.lower())()
+            elif op == "SIGMOID":
                 env[n.id] = xs[0].sigmoid()
             elif op == "TANH":
                 env[n.id] = xs[0].tanh()
@@ -101,3 +104,25 @@ class TinygradBackend:
                 raise NotImplementedError(f"Tinygrad lowering missing for {op}")
 
         return {name: env[name] for name in graph.outputs}
+
+    def inspect_uops(self, graph: Graph, feeds: dict[str, Any]):
+        """Inspect the actual lazy Tinygrad UOp DAG, before scheduling/kernel fusion.
+
+        Omit buffer values and addresses. This is not optimized kernel assembly or
+        an execution benchmark; graph construction may allocate input tensors.
+        """
+        outputs = self.run(graph, feeds)
+        ordered = []
+        indices = {}
+        for tensor in outputs.values():
+            for uop in tensor.uop.toposort():
+                if uop not in indices:
+                    indices[uop] = len(ordered)
+                    ordered.append(uop)
+        return {
+            "schema_version": 1, "source_graph": graph.name,
+            "stage": "lazy_tensor_uops_before_scheduling",
+            "nodes": [{"id": indices[uop], "op": uop.op.name, "dtype": str(uop.dtype),
+                       "inputs": [indices[src] for src in uop.src]} for uop in ordered],
+            "outputs": {name: indices[tensor.uop] for name, tensor in outputs.items()},
+        }

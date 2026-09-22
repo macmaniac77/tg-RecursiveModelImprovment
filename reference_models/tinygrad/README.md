@@ -3,13 +3,13 @@
 Pinned upstream: `tinygrad/tinygrad` at
 `b7ff6dedf7e385b603bf9442ee23c6adf6601fb4`.
 
-The committed `catalog.json.gz` inventories **all 279 tracked files** under
-`examples/` and `extra/models/` at this revision: **63 Python example files and
-15 shared Python model files**, with 1,330 module/class/function records. Other
+The committed `catalog.json.gz` inventories **all 288 tracked files** under
+`examples/`, `extra/models/`, and `tinygrad/llm/` at this revision: **63 Python example files and
+15 shared Python model files plus 8 LLM implementation files**, with 1,463 module/class/function records. Other
 files (shell scripts, browser code, assets, configuration, etc.) are inventoried
 and linked, not translated. Files elsewhere in Tinygrad are outside this scope.
 
-This is a static source projection, **not full-model canonical IR**. All 78 Python
+This is a static source projection, **not full-model canonical IR**. All 86 Python
 files can be inspected without importing them, downloading weights, running their
 entrypoints, or executing model code. Every source call is recorded. Recognized
 qualified Tinygrad APIs map to semantic AOI families; local/imported definitions
@@ -86,7 +86,7 @@ not validate browser layout or GPU performance.
 
 Next families: rotary position embeddings, multihead/GQA layout, embeddings and
 KV state; YOLOv8 DFL/head and decoding; training BatchNorm; recurrent state-space
-blocks; diffusion conditioning; then whole-model equivalence and measured runs.
+blocks; diffusion conditioning; then whole-model equivalence and measured runs. Rotary, masked GQA and explicit DeltaNet recurrence are now available; see [Qwen blocks](QWEN_BLOCKS.md).
 A source entry must pass explicit binding/type and numerical equivalence gates
 before it becomes a fully executable architecture mapping.
 
@@ -94,3 +94,5 @@ Validation result for this change: **33 passed, 1 skipped**, plus jsdom navigati
 smoke checks. Tinygrad 0.14.0 on the Python interpreter backend; PyTorch-dependent
 importer test skipped. Real-browser layout and GPU performance are unverified.
 Upstream code/excerpts retain the [MIT license](UPSTREAM_LICENSE).
+
+The Qwen expansion adds ten builders; see [Qwen semantics and validation](QWEN_BLOCKS.md).

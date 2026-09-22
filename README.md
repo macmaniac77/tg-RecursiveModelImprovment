@@ -126,7 +126,10 @@ The viewer can now browse the pinned Tinygrad example/shared-model source catalo
 python -m tgaoi.viewer --examples reference_models/tinygrad/catalog.json.gz --output artifacts/tinygrad-viewer.html
 ```
 
-All 78 Python files in the catalog are source-inspectable. Reusable numerical
+All 86 Python files in the catalog are source-inspectable. Reusable numerical
 blocks include YOLOv8 Conv/Bottleneck/C2f/SPPF, dense MLP, SwiGLU and more.
 Source coverage is not full-model executable coverage; unresolved calls remain
 explicit. See [coverage and regeneration](reference_models/tinygrad/README.md).
+
+Qwen-capable LLM primitives now include RoPE, masked GQA, explicit caches, causal
+convolution and gated-delta state updates. See [Qwen blocks](reference_models/tinygrad/QWEN_BLOCKS.md).

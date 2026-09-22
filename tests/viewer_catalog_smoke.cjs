@@ -12,7 +12,7 @@ function button(text, root=doc) {
   assert.ok(node, `Missing button ${text}`);return node;
 }
 button('Tinygrad examples').click();
-assert.match(doc.querySelector('#content').textContent, /78 Python files/);
+assert.match(doc.querySelector('#content').textContent, /86 Python files/);
 const search = doc.querySelector('[aria-label="Search Tinygrad examples"]');
 search.value='yolov8.py';search.dispatchEvent(new dom.window.Event('input'));
 const file = [...doc.querySelectorAll('#content details')].find(d=>d.firstChild.textContent.startsWith('examples/yolov8.py'));
@@ -22,6 +22,13 @@ assert.match(doc.querySelector('#detail').textContent, /Inference only/);
 button('YOLOV8_C2F', doc.querySelector('#detail')).click();
 assert.match(doc.querySelector('#detail').textContent, /Primitive coverage complete/);
 button('Tinygrad examples').click();
+const llmSearch=doc.querySelector('[aria-label="Search Tinygrad examples"]');
+llmSearch.value='tinygrad/llm/model.py';llmSearch.dispatchEvent(new dom.window.Event('input'));
+const llmFile=[...doc.querySelectorAll('#content details')].find(d=>d.firstChild.textContent.startsWith('tinygrad/llm/model.py'));
+assert.ok(llmFile);llmFile.open=true;llmFile.dispatchEvent(new dom.window.Event('toggle'));
+button('GatedDeltaNetBlock._attention',llmFile).click();
+button('GATED_DELTA_SCAN',doc.querySelector('#detail')).click();
+assert.match(doc.querySelector('#detail').textContent,/Primitive coverage complete/);
 button('AOI & primitive audit').click();
 const filter = doc.querySelector('[aria-label="Filter AOIs"]');
 filter.value='swiglu';filter.dispatchEvent(new dom.window.Event('input'));

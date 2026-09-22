@@ -47,3 +47,14 @@ __all__ += [
     'residual_graph', 'batchnorm_inference_graph', 'pool2d_graph', 'mlp_graph', 'swiglu_graph',
     'yolov8_conv_graph', 'yolov8_bottleneck_graph', 'yolov8_c2f_graph', 'yolov8_sppf_graph',
 ]
+
+from .llm import (
+    rotary_frequencies_graph, rope_graph, l2_normalize_graph, grouped_query_attention_graph,
+    kv_append_graph, causal_depthwise_conv_graph, delta_gates_graph, gated_delta_step_graph,
+    gated_delta_scan_graph, gated_rmsnorm_graph,
+)
+__all__ += [
+    'rotary_frequencies_graph', 'rope_graph', 'l2_normalize_graph', 'grouped_query_attention_graph',
+    'kv_append_graph', 'causal_depthwise_conv_graph', 'delta_gates_graph', 'gated_delta_step_graph',
+    'gated_delta_scan_graph', 'gated_rmsnorm_graph',
+]

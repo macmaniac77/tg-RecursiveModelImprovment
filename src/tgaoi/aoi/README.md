@@ -73,7 +73,7 @@ complete shape/type validator or proof of source-model equivalence.
 
 ## Tinygrad reusable-block expansion
 
-The current public inventory is **37 builders / 42 default-and-variant graphs**,
+The first Tinygrad expansion produced **37 builders / 42 default-and-variant graphs**,
 with **23 graphs having complete backend operation coverage**. The earlier dated
 five-AOI capability review above describes the pre-expansion baseline.
 
@@ -85,3 +85,10 @@ Conv2D and unmasked attention now execute. See
 `compose.inline` requires exact child bindings and namespaces every node while
 retaining child-instance provenance. This is explicit composition; it does not
 make the remaining source-level AOI sketches recursively executable.
+
+## Qwen-capable LLM expansion
+
+Current inventory: **47 builders, 52 default/variant graphs, 33 with complete
+backend operation coverage**. Ten new graphs cover rotary frequencies/RoPE, L2
+normalization, masked GQA, KV append, causal convolution state, DeltaNet gates,
+step/scan recurrence and gated RMSNorm. [Contracts and evidence](../../../reference_models/tinygrad/QWEN_BLOCKS.md).

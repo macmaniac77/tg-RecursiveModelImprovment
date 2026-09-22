@@ -14,12 +14,18 @@ from collections import Counter
 from pathlib import Path
 
 SCHEMA = 1
-RULES_VERSION = 1
+RULES_VERSION = 2
 LIBRARY_BLOCKS = {
     ('examples/yolov8.py', 'Conv_Block'): 'YOLOV8_CONV',
     ('examples/yolov8.py', 'Bottleneck'): 'YOLOV8_BOTTLENECK',
     ('examples/yolov8.py', 'C2f'): 'YOLOV8_C2F',
     ('examples/yolov8.py', 'SPPF'): 'YOLOV8_SPPF',
+    ('tinygrad/llm/model.py', 'precompute_freqs_cis'): ['ROTARY_FREQUENCIES'],
+    ('tinygrad/llm/model.py', 'apply_rope'): ['ROPE_HALF_SPLIT'],
+    ('tinygrad/llm/model.py', 'FFNBlock._feed_forward'): ['SWIGLU'],
+    ('tinygrad/llm/model.py', 'TransformerBlock._attention'): ['MASKED_GQA', 'KV_APPEND', 'ROPE_HALF_SPLIT'],
+    ('tinygrad/llm/model.py', 'GatedDeltaNetBlock._attention'): [
+        'CAUSAL_DEPTHWISE_CONV_STATE','L2_NORMALIZE','DELTA_GATES','GATED_DELTA_STEP','GATED_DELTA_SCAN','GATED_RMSNORM'],
 }
 API_AOIS = {
     'tinygrad.nn.Linear': 'LINEAR', 'tinygrad.nn.Conv2d': 'CONV2D',
@@ -159,7 +165,7 @@ def parse_source(path, source):
 
 def build_catalog(root: Path, revision='HEAD'):
     sha = git(root, 'rev-parse', '--verify', revision + '^{commit}').decode().strip()
-    paths = git(root, 'ls-tree', '-r', '--name-only', sha, '--', 'examples', 'extra/models').decode().splitlines()
+    paths = git(root, 'ls-tree', '-r', '--name-only', sha, '--', 'examples', 'extra/models', 'tinygrad/llm').decode().splitlines()
     files = []
     for path in sorted(paths):
         raw = git(root, 'show', f'{sha}:{path}')
@@ -181,8 +187,12 @@ def build_catalog(root: Path, revision='HEAD'):
     for f in files:
         for symbol in f['symbols']:
             if (mapped := LIBRARY_BLOCKS.get((f['path'], symbol['name']))) is not None:
-                symbol['library_aoi'] = mapped
-                symbol['library_scope'] = 'Inference only, explicit frozen BatchNorm state; tested small configurations. Bottleneck uses 3x3 kernels. Not a complete YOLOv8 translation.'
+                if isinstance(mapped, list):
+                    symbol['library_aois'] = mapped
+                    symbol['library_scope'] = 'Reusable float32 mathematical subgraphs only. Explicit state; no quantized weights, fused AMD kernels, full model or MoE equivalence. FFN link covers dense branch only. See QWEN_BLOCKS.md.'
+                else:
+                    symbol['library_aoi'] = mapped
+                    symbol['library_scope'] = 'Inference only, explicit frozen BatchNorm state; tested small configurations. Bottleneck uses 3x3 kernels. Not a complete YOLOv8 translation.'
             for call in symbol['calls']:
                 target = definitions.get(call['resolved_api'])
                 if not target and not call['local_shadowed'] and call['expression'].isidentifier():
@@ -193,7 +203,7 @@ def build_catalog(root: Path, revision='HEAD'):
     counts = Counter(c['status'] for f in files for s in f['symbols'] for c in s['calls'])
     return {'schema_version': SCHEMA, 'rules_version': RULES_VERSION,
             'upstream': {'repository': 'https://github.com/tinygrad/tinygrad', 'revision': sha},
-            'scope': ['examples/**', 'extra/models/**'],
+            'scope': ['examples/**', 'extra/models/**', 'tinygrad/llm/**'],
             'representation': 'static_source_projection_not_executable_ir',
             'summary': {'files': len(files), 'python_files': sum(f['kind'] == 'python' for f in files),
                         'parse_errors': sum(f['status'] == 'parse_error' for f in files),
