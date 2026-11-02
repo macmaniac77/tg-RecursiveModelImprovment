@@ -133,3 +133,16 @@ explicit. See [coverage and regeneration](reference_models/tinygrad/README.md).
 
 Qwen-capable LLM primitives now include RoPE, masked GQA, explicit caches, causal
 convolution and gated-delta state updates. See [Qwen blocks](reference_models/tinygrad/QWEN_BLOCKS.md).
+
+### JEPA model example
+
+```bash
+pip install -e '.[tinygrad]' 'tinygrad==0.14.0'
+python examples/jepa.py --steps 20 --seed 7
+```
+
+A small JEPA-style vector model now composes explicit context/target encoders,
+a predictor, stopped-gradient latent MSE and an EMA target update from canonical
+blocks. It includes forward/gradient/state equivalence tests and an optional
+JSON graph export. This is a synthetic teaching example, not a pretrained
+I-JEPA/V-JEPA port. See [architecture, usage and limits](examples/README.md).

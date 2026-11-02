@@ -58,3 +58,6 @@ __all__ += [
     'kv_append_graph', 'causal_depthwise_conv_graph', 'delta_gates_graph', 'gated_delta_step_graph',
     'gated_delta_scan_graph', 'gated_rmsnorm_graph',
 ]
+
+from .jepa import jepa_graph, ema_update_graph
+__all__ += ['jepa_graph', 'ema_update_graph']

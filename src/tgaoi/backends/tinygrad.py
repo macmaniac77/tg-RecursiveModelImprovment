@@ -7,7 +7,7 @@ from ..ir import Graph
 SUPPORTED_OPS = frozenset({
     "COS", "SIN", "LOG",
     "SIGMOID", "TANH", "ERF", "CONV2D", "RESHAPE", "CONCAT", "SLICE", "MAX_POOL2D", "AVG_POOL2D",
-    "CONST", "IDENTITY", "ADD", "SUB", "MUL", "DIV", "MAXIMUM", "EXP",
+    "CONST", "IDENTITY", "STOP_GRADIENT", "ADD", "SUB", "MUL", "DIV", "MAXIMUM", "EXP",
     "SQRT", "RSQRT", "MATMUL", "TRANSPOSE", "REDUCE_SUM", "REDUCE_MEAN", "REDUCE_MAX",
 })
 
@@ -74,6 +74,8 @@ class TinygradBackend:
                 env[n.id] = Tensor(n.attrs["value"])
             elif op == "IDENTITY":
                 env[n.id] = xs[0]
+            elif op == "STOP_GRADIENT":
+                env[n.id] = xs[0].detach()
             elif op == "ADD":
                 env[n.id] = xs[0] + xs[1]
             elif op == "SUB":
