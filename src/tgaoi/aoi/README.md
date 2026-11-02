@@ -92,3 +92,13 @@ Current inventory: **47 builders, 52 default/variant graphs, 33 with complete
 backend operation coverage**. Ten new graphs cover rotary frequencies/RoPE, L2
 normalization, masked GQA, KV append, causal convolution state, DeltaNet gates,
 step/scan recurrence and gated RMSNorm. [Contracts and evidence](../../../reference_models/tinygrad/QWEN_BLOCKS.md).
+
+## JEPA-style example
+
+`jepa_graph(input_dim=8, hidden_dim=16, latent_dim=8)` adds an executable paired
+vector model with explicit context/target encoders, predictor, stopped target
+and scalar latent MSE. Three MLP instances expand to primitives with retained
+composition provenance. `ema_update_graph(decay=0.99)` returns detached next
+target state for one parameter tensor; the caller assigns it after optimization.
+These add two builders to the inventory above. Both appear in the audit/viewer
+catalog. [Run instructions, contracts and limits](../../../examples/README.md).

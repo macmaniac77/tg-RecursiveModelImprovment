@@ -23,3 +23,7 @@ Tinygrad backend should eventually support:
 Only after the Tinygrad path is trustworthy, optional exporters may target PyTorch, JAX, C++, etc. Those are useful for validation and portability, but should not distract from the canonical-IR → Tinygrad path.
 
 A backend is complete for an operation only when equivalence tests exist.
+
+`STOP_GRADIENT` preserves forward values and detaches the Tinygrad autodiff
+path. It is distinct from `IDENTITY`; `tests/test_jepa.py` verifies that target
+parameters and target-view inputs receive no loss gradients after serialization.
